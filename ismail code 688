@@ -1,0 +1,218 @@
+#R-Code for Ridge Regression for non-symmetric errors
+#################Muhammad Ismail########################
+#############Roll no P2-14########################
+for (j in 1:length(sigma.hetro)) {
+e.hetro[[j]] = rnorm(n, 0, sigma.hetro[j])  # Use double brackets to assign a vector
+}
+e=e.hetro[[j]]
+y=Z%*%alpha+e
+#y[5]=y[5]+20
+beta.hat=solve(t(x)%*%x)%*%t(x)%*%y
+y.hat=x%*%beta.hat
+e1=(y-y.hat)
+sigma.hat=sum((y-y.hat)^2)/(n-p)
+alpha.hat=solve(lam)%*%t(Z)%*%y
+#OLS estimator
+alphahat.ols[,i]=alpha.hat
+#HK 1970 Ridge estimator
+HK=sigma.hat/max(alpha.hat^2)
+K1[i]=HK
+T1=solve(lam+I*K1[i])%*%lam
+alphahat.HK[,i]=T1%*%alphahat.ols[,i]
+#HKB 1975 Ridge estimator
+HKB=(p*sigma.hat)/sum(alpha.hat^2)
+K2[i]=HKB
+T2=solve(lam+I*K2[i])%*%lam
+alphahat.HKB[,i]=T2%*%alphahat.ols[,i]
+#LW 1976 Ridge estimator
+LW=(p*sigma.hat)/sum(e.val*alpha.hat^2)
+K3[i]=LW
+T3=solve(lam+I*K3[i])%*%lam
+alphahat.LW[,i]=T3%*%alphahat.ols[,i]
+#HSL 1976 Ridge estimator
+HSL=((sigma.hat)*sum((alpha.hat*e.val)^2))/(sum(e.val*alpha.hat^2))^2
+K4[i]=HSL
+T4=solve(lam+I*K4[i])%*%lam
+alphahat.HSL[,i]=T4%*%alphahat.ols[,i]
+#KGM 2003  Ridge estimator
+KGM=sigma.hat/(prod(alpha.hat^2))^(1/p)
+K5[i]=KGM
+T5=solve(lam+I*K5[i])%*%lam
+alphahat.KGM[,i]=T5%*%alphahat.ols[,i]
+#KMS 2013  Ridge estimator
+#HK=sigma.hat/max(alpha.hat^2)
+W=max(e.val)/sum(abs(alpha.hat))
+KMS=W*HK
+K6[i]=KMS
+T6=solve(lam+I*K6[i])%*%lam
+alphahat.KMS[,i]=T6%*%alphahat.ols[,i]
+# heteroscedastic Estimators
+#  heteroscedastic Ridge
+tah=sqrt((p*abs(max(e1)))/abs(min(e1)))
+sigma.hatro2=tah*sigma.hat
+# HK heteroscedastic adjusted ridge (HKAR)
+HKAR=sigma.hatro2/max(alpha.hat^2)
+K7[i]=HKAR
+T7=solve(lam+I*K7[i])%*%lam
+alphahat.HKAR[,i]=T7%*%alphahat.ols[,i]
+# HKB heteroscedastic adjusted ridge (HKB AR)
+HKBAR=p*sigma.hatro2/sum(alpha.hat^2)
+K8[i]=HKBAR
+T8=solve(lam+I*K8[i])%*%lam
+alphahat.HKBAR[,i]=T8%*%alphahat.ols[,i]
+# LW heteroscedastic adjusted ridge (LW AR)
+LWAR=p*sigma.hatro2/sum(e.val*alpha.hat^2)
+K9[i]=LWAR
+T9=solve(lam+I*K9[i])%*%lam
+alphahat.LWAR[,i]=T9%*%alphahat.ols[,i]
+# HSL heteroscedastic adjusted ridge (HSL AR)
+HSLAR = ((sigma.hatro2)*sum((alpha.hat*e.val)^2))/(sum(e.val*alpha.hat^2))^2
+K10[i]=HSLAR
+T10=solve(lam+I*K10[i])%*%lam
+alphahat.HSLAR[,i]=T10%*%alphahat.ols[,i]
+# KGM heteroscedastic adjusted ridge (KGM AR)
+KGMAR = (sigma.hatro2)/(prod(alpha.hat^2))^(1/p)
+K11[i]=KGMAR
+T11=solve(lam+I*K11[i])%*%lam
+alphahat.KGMAR[,i]=T11%*%alphahat.ols[,i]
+# KMS heteroscedastic adjusted ridge (KMS AR)
+#HKAR=sigma.hatro2/max(alpha.hat^2)
+KMSAR =W*HKAR
+K12[i]=KMSAR
+T12=solve(lam+I*K12[i])%*%lam
+alphahat.KMSAR[,i]=T12%*%alphahat.ols[,i]
+# Two paramater Hetroscedastic RR
+# LC estimator
+LC=HK
+K13[i]=LC
+q.num13=(t(y)%*%Z)%*%solve(lam+I*K13[i])%*%lam%*%alphahat.ols[,i]
+q.den13=(t(y)%*%Z)%*%solve(lam+I*K13[i])%*%lam%*%solve(lam+I*K13[i])%*%lam%*%alphahat.ols[,i]
+q13=q.num13/q.den13
+q13=c(q13)
+alphahatk13=q13*(solve(lam+I*K13[i])%*%lam%*%alphahat.ols[,i])
+alphahatk13=c(alphahatk13)
+alphahat.LC[,i] = alphahatk13
+# Selma Thoker
+ST=HK
+K14[i]=ST
+q.opt.N14=(sum((alphahat.ols[,i]^2)*e.val)/(e.val+K14[i]))
+q.opt.D14=sum((sigma.hat*e.val+(alphahat.ols[,i]^2)*e.val)/(e.val+K14[i])^2)
+q.opt14=q.opt.N14/q.opt.D14
+q.opt14=c(q.opt14)
+k.opt.N14=q.opt14*(sum(sigma.hat*e.val))+(q.opt14-1)*sum((alphahat.ols[,i]^2)*e.val)
+k.opt.D14=sum((alphahat.ols[,i]^2)*e.val)
+k.opt14=k.opt.N14/k.opt.D14
+k.opt14=c(k.opt14)
+alphahatk14=q.opt14*(solve(lam+I*k.opt14)%*%lam%*%alphahat.ols[,i])
+alphahatk14=c(alphahatk14)
+alphahat.ST[,i] = alphahatk14
+# Proposed New Tah for Hetroscedasticity
+# modified tah
+tah1=sqrt((p*abs(max(e1)))/abs(min(e1)))
+sigma.hatro3=tah1*sigma.hat
+HKAR1=sigma.hatro3/max(alpha.hat^2)
+IQW1= mean(HKAR1)
+IQW2 =median(HKAR1)
+K15[i]=IQW1
+q.num15=(t(y)%*%Z)%*%solve(lam+I*K15[i])%*%lam%*%alphahat.ols[,i]
+q.den15=(t(y)%*%Z)%*%solve(lam+I*K15[i])%*%lam%*%solve(lam+I*K15[i])%*%lam%*%alphahat.ols[,i]
+q15=q.num15/q.den15
+q15=c(q15)
+alphahatk15=q15*(solve(lam+I*K15[i])%*%lam%*%alphahat.ols[,i])
+alphahatk15=c(alphahatk15)
+alphahat.IQW1[,i] = alphahatk15
+K16[i]=IQW2
+q.num16=(t(y)%*%Z)%*%solve(lam+I*K16[i])%*%lam%*%alphahat.ols[,i]
+q.den16=(t(y)%*%Z)%*%solve(lam+I*K16[i])%*%lam%*%solve(lam+I*K16[i])%*%lam%*%alphahat.ols[,i]
+q16=q.num16/q.den16
+q16=c(q16)
+alphahatk16=q16*(solve(lam+I*K16[i])%*%lam%*%alphahat.ols[,i])
+alphahatk16=c(alphahatk16)
+alphahat.IQW2[,i] = alphahatk16
+IQW3=LWAR
+K17[i]=IQW3
+q.num17=(t(y)%*%Z)%*%solve(lam+I*K17[i])%*%lam%*%alphahat.ols[,i]
+q.den17=(t(y)%*%Z)%*%solve(lam+I*K17[i])%*%lam%*%solve(lam+I*K17[i])%*%lam%*%alphahat.ols[,i]
+q17=q.num17/q.den17
+q17=c(q17)
+alphahatk17=q17*(solve(lam+I*K17[i])%*%lam%*%alphahat.ols[,i])
+alphahatk17=c(alphahatk17)
+alphahat.IQW3[,i] = alphahatk17
+IQW4=HSLAR
+K18[i]=IQW4
+q.num18=(t(y)%*%Z)%*%solve(lam+I*K18[i])%*%lam%*%alphahat.ols[,i]
+q.den18=(t(y)%*%Z)%*%solve(lam+I*K18[i])%*%lam%*%solve(lam+I*K18[i])%*%lam%*%alphahat.ols[,i]
+q18=q.num18/q.den18
+q18=c(q18)
+alphahatk18=q18*(solve(lam+I*K18[i])%*%lam%*%alphahat.ols[,i])
+alphahatk18=c(alphahatk18)
+alphahat.IQW4[,i] = alphahatk18
+IQW5= mad(HKAR1)
+K19[i]=IQW5
+q.num19=(t(y)%*%Z)%*%solve(lam+I*K19[i])%*%lam%*%alphahat.ols[,i]
+q.den19=(t(y)%*%Z)%*%solve(lam+I*K19[i])%*%lam%*%solve(lam+I*K19[i])%*%lam%*%alphahat.ols[,i]
+q19=q.num19/q.den19
+q19=c(q19)
+alphahatk19=q19*(solve(lam+I*K19[i])%*%lam%*%alphahat.ols[,i])
+alphahatk19=c(alphahatk19)
+alphahat.IQW5[,i] = alphahatk19
+IQW6=KMSAR
+K20[i]=IQW6
+q.num20=(t(y)%*%Z)%*%solve(lam+I*K20[i])%*%lam%*%alphahat.ols[,i]
+q.den20=(t(y)%*%Z)%*%solve(lam+I*K20[i])%*%lam%*%solve(lam+I*K20[i])%*%lam%*%alphahat.ols[,i]
+q20=q.num20/q.den20
+q20=c(q20)
+alphahatk20=q20*(solve(lam+I*K20[i])%*%lam%*%alphahat.ols[,i])
+alphahatk20=c(alphahatk20)
+alphahat.IQW6[,i] = alphahatk20
+}
+#End of simulation loop for N=5000 runs.
+MSE.ols=sum((alphahat.ols-c(alpha.hat))^2)/N
+MSE.HK=sum((alphahat.HK-c(alpha.hat))^2)/N
+MSE.HKB=sum((alphahat.HKB-c(alpha.hat))^2)/N
+MSE.LW=sum((alphahat.LW-c(alpha.hat))^2)/N
+MSE.HSL=sum((alphahat.HSL-c(alpha.hat))^2)/N
+MSE.KGM=sum((alphahat.KGM-c(alpha.hat))^2)/N
+MSE.KMS=sum((alphahat.KMS-c(alpha.hat))^2)/N
+MSE.HKAR=sum((alphahat.HKAR-c(alpha.hat))^2)/N
+MSE.HKBAR=sum((alphahat.HKBAR-c(alpha.hat))^2)/N
+MSE.LWAR=sum((alphahat.LWAR-c(alpha.hat))^2)/N
+MSE.HSLAR=sum((alphahat.HSLAR-c(alpha.hat))^2)/N
+MSE.KGMAR=sum((alphahat.KGMAR-c(alpha.hat))^2)/N
+MSE.KMSAR=sum((alphahat.KMSAR-c(alpha.hat))^2)/N
+MSE.LC=sum((alphahat.LC-c(alpha.hat))^2)/N
+MSE.ST=sum((alphahat.ST-c(alpha.hat))^2)/N
+MSE.IQW1=sum((alphahat.IQW1-c(alpha.hat))^2)/N
+MSE.IQW2=sum((alphahat.IQW2-c(alpha.hat))^2)/N
+MSE.IQW3=sum((alphahat.IQW3-c(alpha.hat))^2)/N
+MSE.IQW4=sum((alphahat.IQW4-c(alpha.hat))^2)/N
+MSE.IQW5=sum((alphahat.IQW5-c(alpha.hat))^2)/N
+MSE.IQW6=sum((alphahat.IQW6-c(alpha.hat))^2)/N
+MSE=c(MSE.ols,MSE.HK,MSE.HKB,MSE.LW,MSE.HSL,MSE.KGM,MSE.KMS,
+MSE.HKAR,MSE.HKBAR,MSE.LWAR,MSE.HSLAR,MSE.KGMAR,MSE.KMSAR,MSE.LC,MSE.ST,
+MSE.IQW1,MSE.IQW2,MSE.IQW3,MSE.IQW4,MSE.IQW5,MSE.IQW6)
+MSE=round(MSE,10)
+as.matrix(MSE)
+MSE.r[,f]=MSE
+}
+#End of correlation loop
+MSE.n[,,a]=MSE.r
+} #End of sample size
+MSE.p[,,,b]=MSE.n
+}
+#End of predictors loop
+col.names=c("0.85","0.95","0.99","0.999")
+row.names=c("OLS","HK","HKB","LW","HSL","KGM","KSM",
+"HKAR","HKBAR","LWAR","HSLAR","KGMAR","KMSAR","LC","ST",
+"IQW1","IQW2","IQW3","IQW4","IQW5","IQW6")
+matrix.names2=c("25","50","100")
+matrix.names3=c("4","10")
+dimnames(MSE.p)=list(row.names,col.names,matrix.names2,matrix.names3)
+write.csv(MSE.p,file ="D:/mphil research/isamil.csv")
+
+"HKAR","HKBAR","LWAR","HSLAR","KGMAR","KMSAR","LC","ST",
+"IQW1","IQW2","IQW3","IQW4","IQW5","IQW6")
+matrix.names2=c("25","50","100")
+matrix.names3=c("4","10")
+dimnames(MSE.p)=list(row.names,col.names,matrix.names2,matrix.names3)
+write.csv(MSE.p,file ="D:/mphil research/isamil.csv")
